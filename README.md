@@ -36,6 +36,22 @@ You can run it on its own with `node tests/check-bank.cjs`.
 | `js/pool.js` | Picks the 20 questions for a test and avoids recent repeats |
 | `js/app.js` | Screens, answering, scoring, read-aloud |
 | `tests/check-bank.cjs` | Checks every question in the bank |
+| `img/share.png` | Link preview picture for Facebook, WhatsApp… |
+| `tools/share-card.html` | Source of the preview picture |
+
+## Share picture
+
+`img/share.png` (1200×630) is the picture Facebook, Messenger and WhatsApp show when the
+link is shared. Its source is `tools/share-card.html`. After changing that page, render it again:
+
+```bash
+google-chrome --headless=new --hide-scrollbars --window-size=1200,630 --virtual-time-budget=8000 \
+  --screenshot="$PWD/img/share.png" "file://$PWD/tools/share-card.html"
+```
+
+Facebook keeps old previews for a while. After pushing, open
+https://developers.facebook.com/tools/debug/?q=https://kikulik.github.io/math-brain-test/
+and press **Scrape Again**.
 
 ## Adding a puzzle type
 

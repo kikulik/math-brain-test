@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Math Brain Test share card</title>
+<!-- Source of img/share.png, the 1200x630 picture shown when the link is shared
+     (Facebook, Messenger, WhatsApp...). How to re-render it: README, "Share picture". -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@800&family=Lexend:wght@500;600&display=block">
+<style>
+:root{
+  --paper:#F4F7FB; --grid:#DCE5F0; --card:#FFFFFF; --ink:#17243A; --ink-soft:#56647A; --accent:#2C5FE3;
+  --rod-white:#FFFFFF; --rod-red:#E0443E; --rod-lgreen:#6CC04A; --rod-purple:#8A4FC9; --rod-yellow:#F4C21B;
+  --rod-dgreen:#1E8758; --rod-black:#2A2E37; --rod-brown:#8B5A34; --rod-blue:#2C5FE3; --rod-orange:#F2711C;
+}
+*{box-sizing:border-box; margin:0}
+html,body{width:1200px; height:630px; overflow:hidden}
+body{
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 2px,transparent 2px),linear-gradient(90deg,var(--grid) 2px,transparent 2px);
+  background-size:36px 36px;
+  color:var(--ink); font-family:Lexend,sans-serif; -webkit-font-smoothing:antialiased;
+}
+.sheet{
+  position:absolute; inset:40px 40px 48px; display:flex; justify-content:space-between; align-items:flex-end; gap:40px;
+  padding:50px 60px; background:var(--card); border:3px solid var(--ink); border-radius:36px; box-shadow:0 8px 0 var(--ink);
+}
+.text{display:flex; flex-direction:column; gap:18px; align-self:stretch; min-width:0}
+.eyebrow{font-weight:600; font-size:22px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft)}
+h1{font:800 96px/.98 Grandstander,sans-serif; letter-spacing:-.01em}
+.lead{font-weight:500; font-size:30px; color:var(--ink-soft)}
+.lead b{font:800 36px/1 Grandstander,sans-serif; color:var(--accent)}
+.chips{display:flex; gap:18px; margin-top:auto}
+.chip{
+  display:flex; align-items:center; gap:10px; height:76px; padding:0 24px; white-space:nowrap;
+  font-weight:600; font-size:34px; background:var(--card);
+  border:3px solid var(--ink); border-radius:16px; box-shadow:0 6px 0 var(--ink);
+}
+.chip .q{color:var(--accent)}
+.chip svg{width:34px; height:34px; display:block}
+.stairs{display:flex; align-items:flex-end; gap:7px; flex:none}
+.stairs i{
+  display:block; width:28px; height:calc(var(--n) * 38px); border-radius:5px; background-color:var(--c);
+  background-image:repeating-linear-gradient(to top, transparent 0 35.5px, rgba(23,36,58,.4) 35.5px 38px);
+  box-shadow:inset 0 0 0 2.5px var(--ink);
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="circle" viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="#2C5FE3" stroke="#17243A" stroke-width="2.5"/></symbol>
+  <symbol id="triangle" viewBox="0 0 34 34"><path d="M17 3.5 31.5 30h-29z" fill="#F2711C" stroke="#17243A" stroke-width="2.5" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="sheet">
+  <div class="text">
+    <p class="eyebrow">Ages 6 to 8 · free · no ads</p>
+    <h1>Math Brain Test</h1>
+    <p class="lead"><b>2,681</b> puzzles. A new test every time.</p>
+    <div class="chips">
+      <span class="chip">7 + 5 = <span class="q">?</span></span>
+      <span class="chip">
+        <svg><use href="#circle"/></svg><svg><use href="#triangle"/></svg>
+        <svg><use href="#circle"/></svg><svg><use href="#triangle"/></svg>
+        <span class="q">?</span>
+      </span>
+    </div>
+  </div>
+  <div class="stairs">
+    <i style="--n:1;--c:var(--rod-white)"></i><i style="--n:2;--c:var(--rod-red)"></i>
+    <i style="--n:3;--c:var(--rod-lgreen)"></i><i style="--n:4;--c:var(--rod-purple)"></i>
+    <i style="--n:5;--c:var(--rod-yellow)"></i><i style="--n:6;--c:var(--rod-dgreen)"></i>
+    <i style="--n:7;--c:var(--rod-black)"></i><i style="--n:8;--c:var(--rod-brown)"></i>
+    <i style="--n:9;--c:var(--rod-blue)"></i><i style="--n:10;--c:var(--rod-orange)"></i>
+  </div>
+</div>
+</body>
+</html>
