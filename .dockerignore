@@ -1,0 +1,6 @@
+.git
+.gitignore
+README.md
+deploy.sh
+docker-compose.yml
+*.md

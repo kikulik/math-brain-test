@@ -1,0 +1,8 @@
+services:
+  math-brain-test:
+    build: .
+    image: math-brain-test:latest
+    container_name: math-brain-test
+    ports:
+      - "${MBT_PORT:-10360}:80"
+    restart: unless-stopped

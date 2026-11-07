@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Math Brain Test</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A math puzzle game for 6 to 8 year olds. Every test picks 20 new questions from a bank of thousands.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='20' width='8' height='10' rx='1' fill='%23E0443E'/%3E%3Crect x='12' y='12' width='8' height='18' rx='1' fill='%23F4C21B'/%3E%3Crect x='22' y='4' width='8' height='26' rx='1' fill='%232C5FE3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;800&family=Lexend:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="wrap">
+  <section id="start" class="sheet" aria-labelledby="start-title">
+    <div class="hero">
+      <div class="hero-text">
+        <p class="eyebrow">For ages 6 to 8 · 20 questions · no timer</p>
+        <h1 id="start-title">Math Brain Test</h1>
+        <p class="lead">Count stars, crack number patterns, read clocks and solve tricky puzzles. Take your time and do your best thinking.</p>
+        <p class="bank"><b id="bank-count">2,681</b> puzzles in the bank. Every test picks a new 20, from warm-ups to tricky ones.</p>
+      </div>
+      <div class="stairs" aria-hidden="true">
+        <i style="--n:1;--c:var(--rod-white)"></i><i style="--n:2;--c:var(--rod-red)"></i>
+        <i style="--n:3;--c:var(--rod-lgreen)"></i><i style="--n:4;--c:var(--rod-purple)"></i>
+        <i style="--n:5;--c:var(--rod-yellow)"></i><i style="--n:6;--c:var(--rod-dgreen)"></i>
+        <i style="--n:7;--c:var(--rod-black)"></i><i style="--n:8;--c:var(--rod-brown)"></i>
+        <i style="--n:9;--c:var(--rod-blue)"></i><i style="--n:10;--c:var(--rod-orange)"></i>
+      </div>
+    </div>
+
+    <div class="skills-wrap">
+      <p class="eyebrow">Five kinds of puzzles, four of each in every test</p>
+      <ul id="skill-list" class="skills"></ul>
+    </div>
+
+    <form id="start-form" class="start-row">
+      <div class="field">
+        <label for="kid-name">Your name (you can skip this)</label>
+        <input id="kid-name" name="kid-name" autocomplete="off" maxlength="24" placeholder="Type your name">
+      </div>
+      <button class="btn" type="submit">Start the test</button>
+    </form>
+
+    <p class="note"><b>For grown-ups:</b> the questions follow what children usually learn in their first two years of school: counting, tens and ones, adding and taking away within 20, number patterns, shapes, and telling time. Tap “Read it to me” for children who are still learning to read. This is a practice quiz, not a real IQ test. A real IQ score needs a standardised test given by a trained psychologist.</p>
+  </section>
+
+  <section id="quiz" class="sheet" hidden aria-label="Question">
+    <div class="qhead">
+      <div class="qmeta">
+        <span id="qcount" class="qcount"></span>
+        <span id="qtag" class="tag"></span>
+      </div>
+      <button id="speak" class="speak" type="button" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        Read it to me
+      </button>
+    </div>
+    <div id="rods" class="rods" aria-hidden="true"></div>
+    <p id="prompt" class="prompt" tabindex="-1"></p>
+    <div id="visual" class="visual"></div>
+    <div id="opts" class="opts" role="group" aria-labelledby="prompt"></div>
+    <div id="feedback" class="feedback" hidden>
+      <p id="fb-text"></p>
+      <button id="next" class="btn" type="button">Next question</button>
+    </div>
+    <span id="live" class="sr" aria-live="polite"></span>
+  </section>
+
+  <section id="result" class="sheet" hidden aria-labelledby="r-title">
+    <div class="r-words">
+      <h2 id="r-title">Well done!</h2>
+      <p id="r-msg" class="lead"></p>
+    </div>
+    <div class="result-top">
+      <div>
+        <p class="eyebrow">Your score</p>
+        <p id="r-score" class="score"></p>
+      </div>
+      <div class="r-side">
+        <div id="r-stars" class="stars" role="img"></div>
+        <p id="r-level" class="level"></p>
+        <p id="r-time" class="meta"></p>
+      </div>
+    </div>
+    <div class="breakdown-wrap">
+      <p class="eyebrow">Skill by skill</p>
+      <div id="r-skills" class="breakdown"></div>
+    </div>
+    <div id="r-practice" class="practice"></div>
+    <details>
+      <summary>See every question and answer</summary>
+      <ol id="r-review" class="review"></ol>
+    </details>
+    <div class="actions">
+      <button id="again" class="btn" type="button">New test, new puzzles</button>
+    </div>
+    <p class="note"><b>For grown-ups:</b> the score shows which skills are solid and which need more practice. It is not an IQ score.</p>
+  </section>
+</main>
+<canvas id="confetti" hidden></canvas>
+
+<script src="js/core.js"></script>
+<script src="js/draw.js"></script>
+<script src="js/bank-numbers.js"></script>
+<script src="js/bank-patterns.js"></script>
+<script src="js/bank-sums.js"></script>
+<script src="js/bank-shapes.js"></script>
+<script src="js/bank-logic.js"></script>
+<script src="js/pool.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
