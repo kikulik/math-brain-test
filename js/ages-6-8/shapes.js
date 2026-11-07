@@ -83,16 +83,15 @@
   });
 
   const FRACTIONS = [[1, 2], [1, 3], [1, 4], [2, 3], [3, 4]];
-  const FRACTION_SAY = { '1/2': 'one half', '1/3': 'one third', '1/4': 'one quarter', '2/3': 'two thirds', '3/4': 'three quarters' };
   M.add({
     id: 'fraction', skill: 'shapes', variants: M.combos(['bar', 'circle'], M.range(0, 4)), level: () => 3,
     make: ([kind, i], r) => {
       const [k, n] = FRACTIONS[i], key = `${k}/${n}`;
-      const wrong = M.shuffle(r, Object.keys(FRACTION_SAY).filter(f => f !== key)).slice(0, 3);
+      const wrong = M.shuffle(r, FRACTIONS.map(([a, b]) => `${a}/${b}`).filter(f => f !== key)).slice(0, 3);
       return {
         text: 'What fraction of the shape is coloured in?', short: `Fraction of a ${kind}`, vis: D.fraction(kind, n, k),
-        opts: [key, ...wrong].map(f => ({ h: D.frac(f), t: f, say: FRACTION_SAY[f] })), a: 0,
-        why: `The shape has ${n} equal parts and ${k} ${k === 1 ? 'is' : 'are'} coloured, so ${key} (${FRACTION_SAY[key]}) is coloured in.`
+        opts: [key, ...wrong].map(f => D.fracOpt(f)), a: 0,
+        why: `The shape has ${n} equal parts and ${k} ${k === 1 ? 'is' : 'are'} coloured, so ${key} (${M.fracSay(k, n)}) is coloured in.`
       };
     }
   });

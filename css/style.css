@@ -67,6 +67,7 @@ p{margin:0}
   transition:transform .08s, box-shadow .08s;
 }
 .btn:active{transform:translateY(4px); box-shadow:0 1px 0 var(--edge)}
+.btn.ghost{background:var(--card); color:var(--ink)}
 .btn:focus-visible,.opt:focus-visible,.speak:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
 
 /* Start screen */
@@ -87,7 +88,22 @@ p{margin:0}
 .skills{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px 18px}
 .skills li{display:flex; align-items:center; gap:10px; font-weight:500}
 .swatch{flex:none; width:26px; height:12px; border-radius:3px; background:var(--c); box-shadow:inset 0 0 0 1.5px var(--edge)}
+.start-form{display:grid; gap:22px}
 .start-row{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 20px}
+.pick{border:0; margin:0; padding:0; display:grid; gap:10px; min-width:0}
+.pick legend{font-weight:500; font-size:.95rem; padding:0; margin-bottom:8px}
+.seg-big span{padding:14px 22px; font-size:1.25rem}
+.seg{display:flex; flex-wrap:wrap; gap:12px}
+.seg label{position:relative; cursor:pointer}
+.seg input{position:absolute; inset:0; margin:0; opacity:0; cursor:pointer; width:100%; height:100%}
+.seg span{
+  display:block; padding:11px 16px; font:800 1rem/1 var(--font-display); color:var(--ink); background:var(--card);
+  border:2px solid var(--edge); border-radius:12px; box-shadow:0 4px 0 var(--edge); transition:transform .08s, box-shadow .08s;
+}
+.seg input:checked + span{background:var(--accent); color:var(--accent-ink)}
+.seg input:focus-visible + span{outline:3px solid var(--accent); outline-offset:3px}
+.seg label:active span{transform:translateY(3px); box-shadow:0 1px 0 var(--edge)}
+.hint{font-size:.92rem; color:var(--ink-soft); max-width:46em}
 .field{display:grid; gap:6px; flex:1 1 240px; max-width:340px}
 .field label{font-weight:500; font-size:.95rem}
 .field input{
@@ -107,6 +123,15 @@ p{margin:0}
   border:2px solid var(--edge); border-radius:999px; padding:6px 13px 6px 11px;
 }
 .speak:hover{background:color-mix(in srgb, var(--accent) 10%, var(--card))}
+.qtools{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+.timer{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 13px 6px 10px; border:2px solid var(--edge); border-radius:999px;
+  font:700 1.05rem/1 var(--font-body); font-variant-numeric:tabular-nums; background:var(--card); transition:background-color .2s, color .2s;
+}
+.timer.low{color:var(--bad); border-color:var(--bad); background:var(--bad-bg)}
+.tbar{height:8px; border-radius:99px; background:var(--grid); overflow:hidden; margin-top:-12px}
+.tbar i{display:block; height:100%; background:var(--accent); transform-origin:left; transition:transform .2s linear}
+.tbar.low i{background:var(--bad)}
 .rods{display:grid; grid-template-columns:repeat(20,minmax(0,1fr)); gap:3px}
 .rod{height:12px; border-radius:3px; box-shadow:inset 0 0 0 1.5px var(--edge); opacity:.35}
 .rod.done{background:var(--c); opacity:1}
@@ -152,6 +177,7 @@ p{margin:0}
   border:2px solid var(--edge); border-radius:12px; background:var(--card);
 }
 .chip svg{width:72%; height:auto}
+.seq.wide .chip{width:auto; min-width:clamp(44px,12vw,62px); padding:0 .45em}
 .chip.q{border-style:dashed; border-color:var(--accent); color:var(--accent); font-family:var(--font-display); font-weight:800}
 .eq{display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:.3em; font:800 clamp(2.4rem,10vw,3.6rem)/1 var(--font-display)}
 .eq .box{display:inline-grid; place-items:center; width:1.15em; height:1.15em; border:3px dashed var(--accent); border-radius:10px; color:var(--accent)}

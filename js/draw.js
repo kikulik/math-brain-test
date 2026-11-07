@@ -1,8 +1,8 @@
 /* Math Brain Test: SVG pictures. Every function returns markup as a string. */
 (function (M) {
   const D = M.draw = {};
-  const f1 = n => Math.round(n * 10) / 10;
-  const rad = deg => deg * Math.PI / 180;
+  const f1 = D.f1 = n => Math.round(n * 10) / 10;          // one decimal place keeps SVG markup short
+  const rad = D.rad = deg => deg * Math.PI / 180;
 
   D.pts = list => list.map(([x, y]) => `${f1(x)},${f1(y)}`).join(' ');
   D.starPts = (cx, cy, R, r) => D.pts(M.range(0, 9).map(i => {
@@ -37,12 +37,29 @@
     return `<span class="frac" aria-hidden="true"><span>${a}</span><span>${b}</span></span><span class="sr">${f}</span>`;
   };
 
-  /* Rows of number chips and big equations */
-  D.seq = items => `<div class="seq">${items.map(it => (it === '?' ? '<span class="chip q">?</span>'
+  /* Fraction answer button exactly as given: stacked on screen, spoken as "3 quarters". D.fracOpt('3/4') or D.fracOpt(3, 4). */
+  D.fracOpt = (n, d) => {
+    const [a, b] = d === undefined ? String(n).split('/').map(Number) : [n, d];
+    return { t: `${a}/${b}`, h: D.frac(`${a}/${b}`), say: M.fracSay(a, b) };
+  };
+
+  /* Rows of number chips and big equations. wide = chips grow to fit big numbers (D.chips). */
+  D.seq = (items, wide) => `<div class="seq${wide ? ' wide' : ''}">${items.map(it => (it === '?' ? '<span class="chip q">?</span>'
     : `<span class="chip">${typeof it === 'object' ? D.icon(it.shape, 40) : it}</span>`)).join('')}</div>`;
-  D.eq = (html, label) => (label
-    ? `<div class="eq" role="img" aria-label="${label}">${html}</div>`
-    : `<div class="eq" aria-hidden="true">${html}</div>`);
+  D.chips = items => D.seq(items, true);
+  D.box = '<span class="box">?</span>';
+  D.eq = (html, label, size) => {
+    const style = size ? ` style="font-size:${size}"` : '';
+    return label
+      ? `<div class="eq" role="img" aria-label="${label}"${style}>${html}</div>`
+      : `<div class="eq" aria-hidden="true"${style}>${html}</div>`;
+  };
+
+  /* SVG text and lines. style is extra inline CSS, e.g. "fill:var(--accent);font-size:18px". */
+  D.text = (x, y, s, { anchor = 'middle', style = '' } = {}) =>
+    `<text x="${f1(x)}" y="${f1(y)}" text-anchor="${anchor}" dominant-baseline="central" class="svg-label"${style ? ` style="${style}"` : ''}>${s}</text>`;
+  D.line = (x1, y1, x2, y2, attrs = 'class="s-ink"') =>
+    `<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" ${attrs}/>`;
 
   /* Shapes dropped into random cells of a 6 × 3 grid, with a little wobble */
   D.scatter = (kinds, r, label) => {

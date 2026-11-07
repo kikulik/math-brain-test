@@ -5,21 +5,24 @@
   const SEEN_KEY = 'mbt-seen-v2';                  // recently asked questions, so retakes feel new
   const keyOf = p => `${M.templates[p.ti].id}:${p.vi}`;
 
+  /* Sorts every template's variants by level and counts the questions for each age (M.poolSize['9-10']). */
   M.prepare = () => {
+    M.poolSize = {};
     M.templates.forEach((t, ti) => {
+      const skill = M.SKILLS[t.skill];
+      if (!skill) throw new Error(`Template "${t.id}" uses unknown skill "${t.skill}"`);
       t.ti = ti;
       t.byLevel = { 1: [], 2: [], 3: [] };
       t.variants.forEach((v, vi) => t.byLevel[t.level(v)].push(vi));
+      M.poolSize[skill.age] = (M.poolSize[skill.age] || 0) + t.variants.length;
     });
-    M.poolSize = M.templates.reduce((n, t) => n + t.variants.length, 0);
   };
 
   function loadSeen() {
-    try { return JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch (e) { return []; }
+    const seen = M.store.get(SEEN_KEY, []);
+    return Array.isArray(seen) ? seen : [];
   }
-  function saveSeen(keys) {
-    try { localStorage.setItem(SEEN_KEY, JSON.stringify(keys.slice(-400))); } catch (e) { /* storage blocked: retakes may repeat */ }
-  }
+  const saveSeen = keys => M.store.set(SEEN_KEY, keys.slice(-400));
 
   function pickVariant(t, lv, seen) {
     const vs = t.byLevel[lv];
@@ -45,9 +48,9 @@
     return null;
   }
 
-  M.newPicks = () => {
+  M.newPicks = age => {
     const history = loadSeen(), seen = new Set(history), picks = [];
-    for (const skill of Object.keys(M.SKILLS)) {
+    for (const skill of M.skillsFor(age)) {
       const used = new Set();
       for (const lv of PLAN) { const p = pickFor(skill, lv, used, seen); if (p) picks.push(p); }
     }

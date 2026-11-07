@@ -1,9 +1,10 @@
 # Math Brain Test
 
-A math puzzle game for children aged 6 to 8. Every test draws 20 questions from a bank of
-thousands: 4 from each of five skills (number sense, patterns, adding & taking away,
-shapes & time, thinking puzzles), ordered from warm-up to tricky. Children can have each
-question read aloud, get a short explanation when they miss one, and finish with a score
+A math puzzle game for children aged 6 to 12, in three age groups (6–8, 9–10, 11–12) picked
+on the start screen. Each age has its own bank of thousands of questions and five skills.
+Every test draws 20 questions, 4 from each skill, ordered from warm-up to tricky. Children
+can have each question read aloud, get a short explanation when they miss one, play with no
+timer, a stopwatch or "Beat the clock" (40/50/60 seconds a question), and finish with a score
 for each skill plus a suggestion for what to practise next.
 
 It is a practice quiz, not an IQ test.
@@ -30,10 +31,12 @@ You can run it on its own with `node tests/check-bank.cjs`.
 |---|---|
 | `index.html` | The page: start screen, question screen, score screen |
 | `css/style.css` | All styles, light and dark themes |
-| `js/core.js` | Shared helpers: seeded random numbers, answer options, word helpers |
-| `js/draw.js` | SVG pictures: shapes, blocks, clocks, balance scale, number line… |
-| `js/bank-*.js` | Puzzle templates, one file per skill |
+| `js/core.js` | Age groups and skills, seeded random numbers, answer options, saved settings |
+| `js/draw.js` | SVG pictures shared by all ages: shapes, blocks, clocks, balance scale, number line… |
+| `js/ages-6-8/`, `js/ages-9-10/`, `js/ages-11-12/` | Puzzle templates, one file per skill; `draw.js` there holds that age's own pictures |
 | `js/pool.js` | Picks the 20 questions for a test and avoids recent repeats |
+| `js/picker.js` | The chunky button rows on the start screen (age, timer) |
+| `js/timer.js` | No timer / Stopwatch / Beat the clock |
 | `js/app.js` | Screens, answering, scoring, read-aloud |
 | `tests/check-bank.cjs` | Checks every question in the bank |
 | `img/share.png` | Link preview picture for Facebook, WhatsApp… |
@@ -55,12 +58,13 @@ and press **Scrape Again**.
 
 ## Adding a puzzle type
 
-Add a template to the right `js/bank-*.js` file:
+Add a template to the right file in `js/ages-…/`. The skill decides the age group
+(skill names are listed in `M.SKILLS` in `js/core.js`, e.g. `sums` for 6–8, `times9` for 9–10,
+`algebra11` for 11–12). Ids for 9–10 start with `a9-`, for 11–12 with `a11-`.
 
 ```js
 M.add({
   id: 'double',                         // unique, never reuse an old id
-  skill: 'sums',                        // numbers | patterns | sums | shapes | logic
   variants: M.range(2, 10),             // every value the template can take
   level: n => (n <= 5 ? 1 : 2),         // 1 warm-up, 2 thinking, 3 tricky
   make: (n, r) => ({                    // r is a seeded random function
@@ -72,4 +76,7 @@ M.add({
 ```
 
 Each variant becomes one question in the bank, and the bank count on the start screen
-updates by itself. Run `node tests/check-bank.cjs` afterwards.
+updates by itself. For answers that can be negative or decimal use `M.valOpts` and write
+negatives with the real minus sign (−5). Run `node tests/check-bank.cjs` afterwards, or
+`node tests/check-bank.cjs 9-10` to check one age. A new file only counts once it has a
+`<script>` tag in `index.html`; the checker reads its file list from there.

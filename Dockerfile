@@ -5,6 +5,7 @@
 
 FROM node:24-bookworm-slim AS check
 WORKDIR /app
+COPY index.html ./
 COPY js ./js
 COPY tests ./tests
 RUN node tests/check-bank.cjs

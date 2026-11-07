@@ -11,20 +11,24 @@
     1: { name: 'Math Explorer',  msg: 'Every puzzle you try makes your brain stronger. Practise together and try again.' }
   };
   const PRAISE = ['Yes! That’s right.', 'Correct! Great thinking.', 'You got it!', 'Super! That’s right.', 'Spot on!'];
-  const state = { screen: 'start', name: '', idx: 0, answers: [], picks: [], perms: [], t0: 0, t1: 0 };
+  const TIMEOUT = -1;   // stored as the answer when "Beat the clock" runs out
+  const state = { screen: 'start', name: '', idx: 0, answers: [], picks: [], perms: [], t0: 0, t1: 0, timer: 'off', times: [], age: M.AGE_DEFAULT };
   let QS = [];
 
   const opt = o => (typeof o === 'string' ? { t: o } : o);
   const answered = i => Number.isInteger(state.answers[i]);
   const isRight = i => state.answers[i] === QS[i].a;
+  const timed = () => state.timer !== 'off';
+  const msBefore = i => state.times.slice(0, i).reduce((a, t) => a + (t || 0), 0);
+  const totalMs = () => msBefore(QS.length);
   const scoreOf = () => QS.filter((q, i) => isRight(i)).length;
   const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function newRun() {
-    const picks = M.newPicks();
+    const picks = M.newPicks(state.age);
     QS = picks.map(M.build);
     Object.assign(state, {
-      picks, idx: 0, answers: [], t0: Date.now(), t1: 0,
+      picks, idx: 0, answers: [], times: [], t0: Date.now(), t1: 0,
       perms: QS.map(q => M.shuffle(Math.random, M.range(0, q.opts.length - 1)))
     });
   }
@@ -61,6 +65,21 @@
     $('#live').textContent = '';
     renderRods();
     if (answered(state.idx)) markAnswered(false);
+    startClock();
+  }
+
+  /* The stopwatch shows the whole test's time; "Beat the clock" shows what is left for this question. */
+  function showClock(ms) {
+    if (state.timer !== 'clock') { M.timer.paint(state.timer, Math.floor((msBefore(state.idx) + ms) / 1000), 1); return; }
+    const lim = M.timer.limit(QS[state.idx].lv), left = Math.max(0, lim - ms);
+    M.timer.paint('clock', Math.ceil(left / 1000), left / lim);
+    if (left <= 0) choose(TIMEOUT);
+  }
+  function startClock() {
+    if (!timed()) { M.timer.paint('off'); return; }
+    const spent = state.times[state.idx] || 0;
+    if (answered(state.idx)) showClock(spent);
+    else M.timer.start(spent, showClock);
   }
   function markAnswered(fresh) {
     const q = QS[state.idx], picked = state.answers[state.idx], ok = picked === q.a;
@@ -75,7 +94,7 @@
     fb.className = `feedback ${ok ? 'good' : 'bad'}`;
     $('#fb-text').innerHTML = ok
       ? `<strong>${PRAISE[state.idx % PRAISE.length]}</strong>`
-      : `<strong>Good try!</strong> The answer is <b>${opt(q.opts[q.a]).t}</b>. ${q.why}`;
+      : `<strong>${picked === TIMEOUT ? 'Time’s up!' : 'Good try!'}</strong> The answer is <b>${opt(q.opts[q.a]).t}</b>. ${q.why}`;
     $('#next').textContent = state.idx === QS.length - 1 ? 'See my score' : 'Next question';
     fb.hidden = false;
     renderRods();
@@ -84,11 +103,17 @@
     $('#next').focus({ preventScroll: true });
     fb.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
   }
+  /* oi is the chosen option, or TIMEOUT when "Beat the clock" runs out. */
   function choose(oi) {
     if (answered(state.idx)) return;
     stopSpeech();
+    if (timed()) {
+      const ms = M.timer.stop();
+      state.times[state.idx] = oi === TIMEOUT ? M.timer.limit(QS[state.idx].lv) : ms;
+    }
     state.answers[state.idx] = oi;
     markAnswered(true);
+    if (timed()) showClock(state.times[state.idx]);
   }
   function goToQuestion() {
     show('quiz');
@@ -130,20 +155,36 @@
   }
   function renderPractice() {
     let worst = null;
-    for (const k of Object.keys(SKILLS)) {
+    for (const k of M.skillsFor(state.age)) {
       const sc = skillScore(k);
       if (sc.got < sc.total && (!worst || sc.got < worst.got)) worst = { k, got: sc.got };
     }
     $('#r-practice').innerHTML = '<p class="eyebrow">Practise next</p>' + (worst
       ? `<p><b>${SKILLS[worst.k].name}.</b> ${SKILLS[worst.k].tip}</p>`
-      : '<p><b>Every skill is strong.</b> Try harder puzzles next, like adding two-digit numbers or telling time to the quarter hour.</p>');
+      : `<p><b>Every skill is strong.</b> ${M.AGES[state.age].next}</p>`);
   }
   function reviewItem(q, i) {
-    const right = opt(q.opts[q.a]).t, ok = isRight(i);
-    const yours = answered(i) ? opt(q.opts[state.answers[i]]).t : 'nothing';
-    const line = ok ? `Answer: <b>${right}</b>` : `You chose <b>${yours}</b>. Answer: <b>${right}</b>`;
+    const right = opt(q.opts[q.a]).t, ok = isRight(i), late = state.answers[i] === TIMEOUT;
+    const yours = answered(i) && !late ? opt(q.opts[state.answers[i]]).t : 'nothing';
+    let line = ok ? `Answer: <b>${right}</b>`
+      : late ? `Time ran out. Answer: <b>${right}</b>`
+      : `You chose <b>${yours}</b>. Answer: <b>${right}</b>`;
+    if (timed() && !late && state.times[i]) line += ` · ${Math.max(1, Math.round(state.times[i] / 1000))} s`;
     return `<li><span class="n">${i + 1}</span><div><p class="rq">${q.short || q.text}</p><p class="ra">${line}</p></div>` +
       `<span class="mark ${ok ? 'ok' : 'no'}" aria-label="${ok ? 'Right' : 'Not right'}">${ok ? '✓' : '✗'}</span></li>`;
+  }
+  function timeLine() {
+    if (!timed()) {
+      const mins = Math.max(1, Math.round(((state.t1 || Date.now()) - state.t0) / 60000));
+      return `Finished in about ${mins} minute${mins === 1 ? '' : 's'}`;
+    }
+    const sec = Math.round(totalMs() / 1000), clock = M.timer.fmt(sec);
+    if (state.timer === 'clock') {
+      const inTime = QS.filter((q, i) => state.answers[i] !== TIMEOUT).length;
+      return `Answered in time: ${inTime} of ${QS.length} · total time ${clock}`;
+    }
+    const per = Math.max(1, Math.round(sec / QS.length));
+    return `Your time: ${clock} · about ${per} second${per === 1 ? '' : 's'} a question`;
   }
   function renderResult() {
     const right = scoreOf(), pct = right / QS.length;
@@ -155,9 +196,9 @@
     $('#r-stars').setAttribute('aria-label', `${stars} out of 5 stars`);
     $('#r-stars').innerHTML = M.range(0, 4).map(i =>
       `<svg viewBox="0 0 48 48" class="${i < stars ? 'on' : ''}" style="--d:${i * 120}ms" aria-hidden="true"><polygon points="${M.draw.starPts(24, 25, 21, 9)}"/></svg>`).join('');
-    const mins = Math.max(1, Math.round(((state.t1 || Date.now()) - state.t0) / 60000));
-    $('#r-time').textContent = `Finished in about ${mins} minute${mins === 1 ? '' : 's'}`;
-    $('#r-skills').innerHTML = Object.keys(SKILLS).map(skillRow).join('');
+    $('#r-time').textContent = timeLine();
+    $('#r-age').textContent = M.AGES[state.age].name;
+    $('#r-skills').innerHTML = M.skillsFor(state.age).map(skillRow).join('');
     renderPractice();
     $('#r-review').innerHTML = QS.map(reviewItem).join('');
   }
@@ -182,7 +223,7 @@
         b.x += b.vx; b.y += b.vy; b.r += b.vr;
         ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.fillStyle = b.c; ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h); ctx.restore();
       }
-      if (t - start < 2800) requestAnimationFrame(frame);
+      if (t - start < 2800 && state.screen === 'result') requestAnimationFrame(frame);
       else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
     })(start);
   }
@@ -200,8 +241,11 @@
     $('#start-form').addEventListener('submit', e => {
       e.preventDefault();
       state.name = $('#kid-name').value.trim().slice(0, 24);
+      state.timer = M.timer.picked();
+      state.age = pickedAge();
       startRun();
     });
+    $('#home').addEventListener('click', () => { show('start'); window.scrollTo({ top: 0 }); });
     $('#opts').addEventListener('click', e => {
       const b = e.target.closest('.opt');
       if (b && !b.disabled) choose(+b.dataset.oi);
@@ -218,7 +262,11 @@
       if (!Array.isArray(d.answers) || !Array.isArray(d.perms) || d.perms.length !== qs.length) return false;
       if (!d.perms.every((p, i) => Array.isArray(p) && p.length === qs[i].opts.length)) return false;
       QS = qs;
-      Object.assign(state, d);
+      Object.assign(state, d, {
+        timer: M.timer.valid(d.timer) ? d.timer : 'off',
+        age: M.validAge(d.age) ? d.age : M.SKILLS[qs[0].skill].age,
+        times: Array.isArray(d.times) ? d.times.map(t => (Number.isFinite(t) ? t : 0)) : []
+      });
       return true;
     } catch (e) { return false; }
   }
@@ -230,12 +278,34 @@
     if (state.screen === 'quiz') renderQuestion(); else renderResult();
   }
 
+  /* ---------- start screen: age picker ---------- */
+  const AGE_KEY = 'mbt-age';
+  const pickedAge = () => { const a = M.picked('age'); return M.validAge(a) ? a : M.AGE_DEFAULT; };
+  function showAge(age) {
+    $('#bank-count').textContent = (M.poolSize[age] || 0).toLocaleString('en-US');
+    $('#age-name').textContent = M.AGES[age].name;
+    $('#age-note').textContent = M.AGES[age].note;
+    $('#skill-list').innerHTML = M.skillsFor(age)
+      .map(k => `<li><i class="swatch" style="--c:var(${SKILLS[k].c})"></i>${SKILLS[k].name}</li>`).join('');
+  }
+  function initAgePicker() {
+    const saved = M.store.get(AGE_KEY, M.AGE_DEFAULT), age = M.validAge(saved) ? saved : M.AGE_DEFAULT;
+    M.picker({
+      el: '#age-modes', name: 'age', selected: age,
+      options: Object.entries(M.AGES).map(([k, a]) => [k, a.name]),
+      onChange: a => { if (!M.validAge(a)) return; M.store.set(AGE_KEY, a); showAge(a); }
+    });
+    showAge(age);
+  }
+
   M.prepare();
-  $('#bank-count').textContent = M.poolSize.toLocaleString('en-US');
-  $('#skill-list').innerHTML = Object.values(SKILLS).map(s => `<li><i class="swatch" style="--c:var(${s.c})"></i>${s.name}</li>`).join('');
+  initAgePicker();
+  M.timer.initPicker();
   wire();
-  window.claude?.hot?.snapshot?.(() => ({
-    ...state, answers: [...state.answers], picks: state.picks.map(p => ({ ...p })), perms: state.perms.map(p => [...p])
-  }));
+  window.claude?.hot?.snapshot?.(() => {
+    const times = [...state.times];
+    if (state.screen === 'quiz' && timed() && !answered(state.idx)) times[state.idx] = Math.round(M.timer.elapsed());
+    return { ...state, times, answers: [...state.answers], picks: state.picks.map(p => ({ ...p })), perms: state.perms.map(p => [...p]) };
+  });
   if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
 })(window.MBT);

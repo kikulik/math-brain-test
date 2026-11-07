@@ -1,7 +1,7 @@
 /* Math Brain Test: adding and taking away (within 20, tens, missing numbers, two-digit sums). */
 (function (M) {
   const D = M.draw;
-  const box = '<span class="box">?</span>';
+  const box = D.box;
 
   function eqQ(expr, spoken, ans, r, cands, why) {
     return { text: `What is ${expr}?`, short: expr, say: `What is ${spoken}?`, vis: D.eq(`${expr} = ${box}`), ...M.numOpts(r, ans, cands), why };
